@@ -1,14 +1,12 @@
-import os
-import sys
+
 import typing
-import webbrowser
 
 from PySide6.QtCore import Signal, QObject, QThread
 from PySide6.QtGui import QActionGroup
 from PySide6.QtWidgets import QMainWindow, QButtonGroup, QLabel, \
-    QTableWidgetItem
+    QTableWidgetItem, QMessageBox
 from faker import Faker
-import pandas as pd
+
 from client_ui import Ui_MainWindow
 
 faker = Faker(locale='zh-CN')
@@ -56,15 +54,14 @@ class ExportThread(QThread):
 
     def run(self):
         sgls.export_thread.emit("开始导出")
-        df = self.__gen_data()
-        df.to_csv('aaa.csv',index=False)
+        with open('aaa.csv', 'w', encoding='utf-8') as f:
+            f.write(','.join(self.labels))
+            f.write('\n')
+            for i in range(self.count):
+                f.write(','.join((mappings[key]() for key in self.labels)))
+                f.write('\n')
         sgls.export_thread.emit("成功导出")
 
-    def __gen_data(self):
-        data = []
-        for i in range(self.count):
-            data.append((mappings[key]() for key in self.labels))
-        return pd.DataFrame(columns=self.labels, data=data)
 
 class FakeDataClient(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -90,7 +87,8 @@ class FakeDataClient(QMainWindow, Ui_MainWindow):
         self.tableWidget_data.remove_cindex.connect(self.remove_column_label)
 
     def action_group_triggered(self, act):
-        webbrowser.open(os.path.join(os.path.dirname(sys.argv[0]), 'html', 'author.html'))
+        QMessageBox.information(None, "联系作者", "如果想增加新的数据类型，请联系作者，邮箱377486624@qq.com")
+
     def btn_group_clicked(self, btn):
         print(btn)
         self.thread = ExportThread(self.labels, int(self.lineEdit_count.text()))

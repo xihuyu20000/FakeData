@@ -2,4 +2,4 @@
 
 pyside6
 faker
-pandas
+Nuitka
