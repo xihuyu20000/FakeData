@@ -57,7 +57,9 @@ class CONST:
     HELP_TEXT = "顶部数据名称区，可以单击，可以双击；数据区标题栏，可以拖拽，可以双击。"
     AUTHOR_TEXT = "如果想增加新的数据类型，请联系作者，邮箱377486624@qq.com"
     BIRTHDAY_START = '1950-01-01'
-    BIRTHDAY_END = '2019-01-01'
+    BIRTHDAY_STOP = '2019-01-01'
+    SALARY_START = 1000
+    SALARY_STOP = 10000
 
 
 faker = Faker(locale=CONST.LOCALE)
@@ -71,7 +73,7 @@ class CfgItem:
         self.func = func
 
 
-tabs = {
+style_items = {
     '地区': [
         CfgItem('国家', faker.country)
         , CfgItem('省', faker.province)
@@ -99,16 +101,17 @@ tabs = {
         CfgItem('姓名', faker.name)
         , CfgItem('女性名', faker.name_female)
         , CfgItem('手机号', faker.phone_number)
-        , CfgItem('生日', f'''
+        , CfgItem('生日', '''
 from datetime import datetime
-start = datetime.strptime('{CONST.BIRTHDAY_START}', '%Y-%m-%d')
-end = datetime.strptime('{CONST.BIRTHDAY_END}', '%Y-%m-%d')
+start = datetime.strptime('{}', '%Y-%m-%d')
+end = datetime.strptime('{}', '%Y-%m-%d')
 val = faker.date_time_between_dates(datetime_start=start,datetime_end=end)
 val = val.strftime('%Y-%m-%d')
 ''')
         , CfgItem('身份证号', faker.ssn)
         , CfgItem('职位', faker.job)
         , CfgItem('邮箱', faker.free_email)
+        , CfgItem('工资', '''val = faker.random_int({},{})''')
     ]
     , '文字': [
         CfgItem('文章', faker.text)
@@ -120,16 +123,28 @@ val = val.strftime('%Y-%m-%d')
         , CfgItem('安全色', faker.safe_color_name)
     ]
 }
-mappings = {
+
+label_mappings = {
 
 }
 
 
-def get_value(func):
+def get_value(key):
+    """
+    有的是内置函数，有的是自定义代码，因此必须判断
+    :param key:
+    :return:
+    """
+    func = label_mappings[key]
     if callable(func):
         val = func()
     elif isinstance(func, str):
-        local = {'val': None}
+        if '生日'== key:
+            func = func.format(CONST.BIRTHDAY_START, CONST.BIRTHDAY_STOP)
+        if '工资'==key:
+            func = func.format(CONST.SALARY_START, CONST.SALARY_STOP)
+        # 运行
+        local = {'val': ''}
         exec(func, globals(), local)
         val = local['val']
     else:
@@ -214,7 +229,7 @@ class ExportThread(QThread):
             for i in range(self.__count):
                 row = []
                 for key in self.__labels:
-                    val = get_value(mappings[key])
+                    val = get_value(key)
                     row.append(val)
                 rows.append(row)
             f.write('\n'.join([','.join(row) for row in rows]))

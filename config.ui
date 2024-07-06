@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>50</x>
@@ -39,7 +39,7 @@
         <second>0</second>
         <year>1949</year>
         <month>12</month>
-        <day>31</day>
+        <day>29</day>
        </datetime>
       </property>
       <property name="displayFormat">
@@ -58,7 +58,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QDateEdit" name="birthday_end">
+     <widget class="QDateEdit" name="birthday_stop">
       <property name="displayFormat">
        <string>yyyy-MM-dd</string>
       </property>
@@ -66,6 +66,110 @@
        <bool>true</bool>
       </property>
      </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>110</y>
+     <width>274</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QLabel" name="label_3">
+      <property name="maximumSize">
+       <size>
+        <width>24</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>工资</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QSpinBox" name="salary_start">
+      <property name="minimumSize">
+       <size>
+        <width>88</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>88</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="sizeIncrement">
+       <size>
+        <width>88</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximum">
+       <number>9999999</number>
+      </property>
+      <property name="singleStep">
+       <number>1</number>
+      </property>
+      <property name="value">
+       <number>1000</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_4">
+      <property name="maximumSize">
+       <size>
+        <width>12</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>到</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QSpinBox" name="salary_stop">
+      <property name="minimumSize">
+       <size>
+        <width>88</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>88</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="maximum">
+       <number>99999999</number>
+      </property>
+      <property name="value">
+       <number>10000</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>
