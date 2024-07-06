@@ -3,10 +3,9 @@ python.exe -m nuitka    ^
 --mingw64   ^
 --enable-plugin=pyside6 ^
 --windows-console-mode=disable  ^
---windows-icon-from-ico=./icons/favicon.ico ^
+--windows-icon-from-ico=./favicon.ico ^
 --remove-output ^
---remove-output ^
---no-pyi-file   ^
+--onefile   ^
 --output-dir=D:\ ^
 --output-filename=FakeData ^
 main.py

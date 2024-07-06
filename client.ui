@@ -16,31 +16,13 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QFrame" name="frame_btnbar">
-      <property name="styleSheet">
-       <string notr="true">QFrame { border:1px solid gray;} </string>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>70</height>
+       </size>
       </property>
-      <property name="frameShape">
-       <enum>QFrame::Shape::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Shadow::Raised</enum>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Orientation::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>759</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
      </widget>
     </item>
     <item>
@@ -60,7 +42,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_example">
+        <widget class="ExampleLabel" name="label_example">
          <property name="minimumSize">
           <size>
            <width>500</width>
@@ -84,6 +66,13 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_config">
+         <property name="text">
+          <string>配置</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -109,6 +98,18 @@
        </item>
        <item>
         <widget class="QLineEdit" name="lineEdit_count">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>100</width>
+           <height>16777215</height>
+          </size>
+         </property>
          <property name="text">
           <string>100</string>
          </property>
@@ -117,21 +118,14 @@
        <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>条记录，导出到</string>
+          <string>条记录，导出</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="btn_export_csv">
          <property name="text">
-          <string>CSV</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_export_excel">
-         <property name="text">
-          <string>Excel</string>
+          <string>CSV文件</string>
          </property>
         </widget>
        </item>
@@ -166,6 +160,7 @@
     <property name="title">
      <string>帮助</string>
     </property>
+    <addaction name="action_help"/>
     <addaction name="action_author"/>
    </widget>
    <addaction name="menu"/>
@@ -176,11 +171,21 @@
     <string>联系作者</string>
    </property>
   </action>
+  <action name="action_help">
+   <property name="text">
+    <string>使用说明</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
    <class>DDTable</class>
    <extends>QTableWidget</extends>
+   <header>util.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ExampleLabel</class>
+   <extends>QLabel</extends>
    <header>util.h</header>
   </customwidget>
  </customwidgets>

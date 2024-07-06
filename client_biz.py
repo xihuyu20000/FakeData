@@ -1,112 +1,122 @@
-
-import typing
-
-from PySide6.QtCore import Signal, QObject, QThread
-from PySide6.QtGui import QActionGroup
-from PySide6.QtWidgets import QMainWindow, QButtonGroup, QLabel, \
-    QTableWidgetItem, QMessageBox
+import pyperclip
+from PySide6.QtGui import QActionGroup, QIntValidator
+from PySide6.QtWidgets import QMainWindow, QButtonGroup, QTableWidgetItem, QMessageBox, QFrame, QHBoxLayout, \
+    QSpacerItem, QSizePolicy, QLabel
 from faker import Faker
 
+import util
 from client_ui import Ui_MainWindow
-
-faker = Faker(locale='zh-CN')
-mappings = {
-    '国家': faker.country
-    , '省份': faker.province
-    , '城市': faker.city
-    , '街道地址': faker.street_address
-    , '公司': faker.company
-    , '邮编': faker.postcode
-    , '邮箱': faker.free_email
-    , '手机号': faker.phone_number
-    , '女性名': faker.name_female
-    , '姓名': faker.name
-    , '身份证号':faker.ssn
-    ,'职位':faker.job
-    ,'ipv4':faker.ipv4
-}
-
-
-class MySignal(QObject):
-    click_label = Signal(str)
-    dbclick_btn = Signal(str)
-    export_thread = Signal(str)
-
-sgls = MySignal()
-
-
-class MyBtn(QLabel):
-    def __init__(self, text):
-        super().__init__(text)
-        self.setObjectName(text)
-
-    def mousePressEvent(self, event):
-        sgls.click_label.emit(self.objectName())
-
-    def mouseDoubleClickEvent(self, event):
-        sgls.dbclick_btn.emit(self.objectName())
-
-class ExportThread(QThread):
-    def __init__(self, labels: typing.List[str], count:int):
-        super().__init__()
-        self.labels = labels
-        self.count = count
-
-    def run(self):
-        sgls.export_thread.emit("开始导出")
-        with open('aaa.csv', 'w', encoding='utf-8') as f:
-            f.write(','.join(self.labels))
-            f.write('\n')
-            for i in range(self.count):
-                f.write(','.join((mappings[key]() for key in self.labels)))
-                f.write('\n')
-        sgls.export_thread.emit("成功导出")
+from config_biz import ConfigBiz
+from util import CONST, mappings, tabs, sgls, ExportThread, MyLabel, get_value
 
 
 class FakeDataClient(QMainWindow, Ui_MainWindow):
+    VERSION = '0.1.1'
     def __init__(self):
         super().__init__()
         self.setupUi(self)
 
-        # 菜单
+        # 菜单栏
         self.action_group = QActionGroup(self)
+        self.action_group.addAction(self.action_help)
         self.action_group.addAction(self.action_author)
         self.action_group.triggered.connect(self.action_group_triggered)
+
+        # 顶部工具栏
+        self.init_toolbar()
+
         # 按钮
         self.btn_group = QButtonGroup(self)
         self.btn_group.addButton(self.btn_export_csv)
-        self.btn_group.addButton(self.btn_export_excel)
+        self.btn_group.addButton(self.btn_config)
         self.btn_group.buttonClicked.connect(self.btn_group_clicked)
-        self.init_btnbar()
+
+
+        intVal = QIntValidator()
+        intVal.setRange(1, 99999999)
+        self.lineEdit_count.setValidator(intVal)
+
+        # 信号槽函数
         sgls.click_label.connect(self.show_example)
-        sgls.dbclick_btn.connect(self.use_btn)
-        sgls.export_thread.connect(self.export_data_handler)
+        sgls.dbclick_btn.connect(self.dbclick_btn)
+        sgls.click_example.connect(self.paste_example)
+        sgls.export_thread.connect(self.show_msg_statusbar)
 
         self.labels = []
         # 删除列的事件
         self.tableWidget_data.remove_cindex.connect(self.remove_column_label)
+        # 显示版本号
+        self.statusbar.addPermanentWidget(QLabel(f"当前版本 {FakeDataClient.VERSION}"))
+
 
     def action_group_triggered(self, act):
-        QMessageBox.information(None, "联系作者", "如果想增加新的数据类型，请联系作者，邮箱377486624@qq.com")
+        match act.objectName():
+            case 'action_help':
+                QMessageBox.information(None, "使用帮助", CONST.HELP_TEXT)
+                return
+            case 'action_author':
+                QMessageBox.information(None, "联系作者", CONST.AUTHOR_TEXT)
+            case _:
+                ...
 
     def btn_group_clicked(self, btn):
-        print(btn)
-        self.thread = ExportThread(self.labels, int(self.lineEdit_count.text()))
-        self.thread.start()
-    def init_btnbar(self):
-        for i in mappings.keys():
-            btn = MyBtn(i)
-            self.frame_btnbar.layout().insertWidget(0, btn)
+
+        match btn.objectName():
+            case 'btn_config':
+                self.config_dialog = ConfigBiz()
+                self.config_dialog.exec()
+
+                CONST.BIRTHDAY_START = self.config_dialog.birthday_start.text()
+                CONST.BIRTHDAY_END = self.config_dialog.birthday_end.text()
+
+
+            case 'btn_export_csv':
+                self.thread = ExportThread(self.labels, int(self.lineEdit_count.text()))
+                self.thread.start()
+                return
+            case _:
+                ...
+
+    def init_toolbar(self):
+        """
+        初始化工具栏
+        """
+        for tabName, itemlist in tabs.items():
+            frame = QFrame()
+            layout = QHBoxLayout(frame)
+            layout.setContentsMargins(10, 0, 0, 0)
+            for item in itemlist:
+                mappings[item.name] = item.func
+                btn = MyLabel(item.name)
+                layout.addWidget(btn)
+            layout.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+            self.tabWidget.addTab(frame, tabName)
 
     def show_example(self, objname):
-        self.label_example.setText(mappings[objname]())
+        """
+        显示示例
+        :param objname:
+        """
+        self.label_example.setText(get_value(mappings[objname]))
 
-    def use_btn(self, objname):
+    def dbclick_btn(self, objname):
+        """
+        双击分类，
+        :param objname:
+        """
         self.labels.append(objname)
-        self.label_example.setText(mappings[objname]())
+        val = get_value(mappings[objname])
+        self.label_example.setText(val)
         self.init_table()
 
+    def paste_example(self, text):
+        pyperclip.copy(text)
+        self.show_msg_statusbar('已经复制到剪贴板')
+
     def init_table(self):
+        """
+        填充数据区
+        """
         self.tableWidget_data.setColumnCount(len(self.labels))
         self.tableWidget_data.setRowCount(10)
 
@@ -114,11 +124,20 @@ class FakeDataClient(QMainWindow, Ui_MainWindow):
 
         for i in range(10):
             for j in range(len(self.labels)):
-                val = mappings[self.labels[j]]()
+                val = get_value(mappings[self.labels[j]])
                 self.tableWidget_data.setItem(i, j, QTableWidgetItem(str(val)))
 
     def remove_column_label(self, i):
+        """
+        数据区，删除列时，维护一下
+        :param i:
+        """
         self.labels.remove(self.labels[i])
 
-    def export_data_handler(self, str):
-        self.statusbar.showMessage(str)
+    def show_msg_statusbar(self, str):
+        """
+        状态栏显示信息
+        :param str:
+        """
+        self.statusbar.showMessage(str, timeout=10000)
+
