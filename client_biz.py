@@ -7,7 +7,7 @@ from faker import Faker
 import util
 from client_ui import Ui_MainWindow
 from config_biz import ConfigBiz
-from util import CONST, mappings, tabs, sgls, ExportThread, MyLabel, get_value
+from util import CONST, label_mappings, style_items, sgls, ExportThread, MyLabel, get_value
 
 
 class FakeDataClient(QMainWindow, Ui_MainWindow):
@@ -67,7 +67,9 @@ class FakeDataClient(QMainWindow, Ui_MainWindow):
                 self.config_dialog.exec()
 
                 CONST.BIRTHDAY_START = self.config_dialog.birthday_start.text()
-                CONST.BIRTHDAY_END = self.config_dialog.birthday_end.text()
+                CONST.BIRTHDAY_STOP = self.config_dialog.birthday_stop.text()
+                CONST.SALARY_START = self.config_dialog.salary_start.value()
+                CONST.SALARY_STOP = self.config_dialog.salary_stop.value()
 
 
             case 'btn_export_csv':
@@ -81,12 +83,12 @@ class FakeDataClient(QMainWindow, Ui_MainWindow):
         """
         初始化工具栏
         """
-        for tabName, itemlist in tabs.items():
+        for tabName, itemlist in style_items.items():
             frame = QFrame()
             layout = QHBoxLayout(frame)
             layout.setContentsMargins(10, 0, 0, 0)
             for item in itemlist:
-                mappings[item.name] = item.func
+                label_mappings[item.name] = item.func
                 btn = MyLabel(item.name)
                 layout.addWidget(btn)
             layout.addSpacerItem(QSpacerItem(20, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
@@ -97,7 +99,7 @@ class FakeDataClient(QMainWindow, Ui_MainWindow):
         显示示例
         :param objname:
         """
-        self.label_example.setText(get_value(mappings[objname]))
+        self.label_example.setText(get_value(objname))
 
     def dbclick_btn(self, objname):
         """
@@ -105,7 +107,7 @@ class FakeDataClient(QMainWindow, Ui_MainWindow):
         :param objname:
         """
         self.labels.append(objname)
-        val = get_value(mappings[objname])
+        val = get_value(objname)
         self.label_example.setText(val)
         self.init_table()
 
@@ -124,7 +126,7 @@ class FakeDataClient(QMainWindow, Ui_MainWindow):
 
         for i in range(10):
             for j in range(len(self.labels)):
-                val = get_value(mappings[self.labels[j]])
+                val = get_value(self.labels[j])
                 self.tableWidget_data.setItem(i, j, QTableWidgetItem(str(val)))
 
     def remove_column_label(self, i):
